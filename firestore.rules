@@ -1,0 +1,73 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions to check user roles from the 'users' collection
+    function isOwner() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Owner';
+    }
+    
+    function isAdmin() {
+      let userRole = get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+      return userRole == 'Admin' || userRole == 'Owner';
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // By default, deny all reads and writes to the database
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Rules for the 'users' collection
+    match /users/{userId} {
+      // Allow a user to read their own profile document
+      allow get: if isSignedIn() && request.auth.uid == userId;
+      // Allow Admins and Owners to read any user's document
+      allow list, read: if isAdmin();
+      // Allow a user to update their own profile information
+      allow update: if isSignedIn() && request.auth.uid == userId;
+      // Only Owners can create or delete user documents
+      allow create, delete: if isOwner();
+    }
+    
+    // Rules for app-wide data collections
+    match /products/{productId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /categories/{categoryId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /sales/{saleId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /customers/{customerId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isAdmin();
+    }
+    
+    match /campaigns/{campaignId} {
+        allow read: if isSignedIn();
+        allow create, update, delete: if isAdmin();
+    }
+    
+    match /orders/{orderId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /stockTransfers/{transferId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isAdmin();
+    }
+  }
+}
