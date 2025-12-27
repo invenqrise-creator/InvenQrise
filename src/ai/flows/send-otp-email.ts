@@ -38,7 +38,7 @@ const sendOtpEmailFlow = ai.defineFlow(
   },
   async (input) => {
     const resend = new Resend(process.env.RESEND_API_KEY);
-    const fromEmail = process.env.RESEND_FROM_EMAIL || 'pratikk5143772@gmail.com';
+    const fromEmail = process.env.RESEND_FROM_EMAIL || 'pratik.kadole@pratikk.site';
     
     // Generate a 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
